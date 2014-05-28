@@ -1,0 +1,103 @@
+import java.util.Scanner;
+import java.util.Set;
+import java.util.HashSet;
+
+public class Main {
+    private static Set<Integer> forward = new HashSet<Integer>();
+    private static Set<Integer> backward = new HashSet<Integer>();
+
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        int s = scan.nextInt();
+        int e = scan.nextInt();
+
+        int fStep = 0;
+        int bStep = 0;
+        forward.add(gen(s, 1));
+        for (int i = 1; i <= 6; i++) backward.add(gen(e, i));
+
+        while (true) {
+            //System.out.println(fStep+": " + forward);
+            Set<Integer> tmp = new HashSet<Integer>(forward);
+            forward.clear();
+            for (Integer n : tmp)
+                if (backward.contains(n)) {
+                    System.out.println(fStep + bStep);
+                    return;
+                }
+            fStep++;
+            for (Integer n : tmp) {
+                Set<Integer> child = children(n);
+                for (Integer c : child) {
+                    if (!tmp.contains(c)) forward.add(c);
+                }
+            }
+            //System.out.println(bStep+": " + backward);
+            tmp = new HashSet<Integer>(backward);
+            backward.clear();
+            for (Integer n : tmp)
+                if (forward.contains(n)) {
+                    System.out.println(fStep + bStep);
+                    return;
+                }
+            bStep++;
+            for (Integer n : tmp) {
+                Set<Integer> child = children(n);
+                for (Integer c : child) {
+                    if (!tmp.contains(c)) backward.add(c);
+                }
+            }
+        }
+    }
+
+    private static Set<Integer> children(int orig) {
+        int num = getNum(orig);
+        int cur = getCur(orig);
+        int bias = getBias(cur);
+        Set<Integer> ret = new HashSet<Integer>();
+        if (cur < 6) ret.add(gen(num, cur+1));
+        if (cur > 1) ret.add(gen(num, cur-1));
+        int curNum = getNum(num, cur);
+        if (curNum < 9) ret.add(gen(num+bias, cur));
+        if (curNum > 0) ret.add(gen(num-bias, cur));
+        int last = num % 10;
+        int first = (num / 100000) % 10;
+        if (cur != 1) {
+            int nn = num - first*100000 - curNum*bias + curNum*100000 + first*bias;
+            ret.add(gen(nn, cur));
+        }
+        if (cur != 6) {
+            int nn = num - last - curNum*bias + curNum + last*bias;
+            ret.add(gen(nn, cur));
+        }
+        return ret;
+    }
+
+    private static int gen(int num, int cur) {
+        return num * 10 + cur;
+    }
+
+    private static int getNum(int orig) {
+        return orig / 10;
+    }
+
+    private static int getCur(int orig) {
+        return orig % 10;
+    }
+
+    private static int getNum(int num, int cur) {
+        int bias = getBias(cur);
+        return (num / bias) % 10;
+    }
+
+    private static int getBias(int cur) {
+        switch(cur) {
+        case 1: return 100000;
+        case 2: return 10000;
+        case 3: return 1000;
+        case 4: return 100;
+        case 5: return 10;
+        default: return 1;
+        }
+    }
+}

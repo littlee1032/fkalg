@@ -1,0 +1,55 @@
+import java.util.Scanner;
+import java.util.Deque;
+import java.util.LinkedList;
+
+public class Main {
+    public static final boolean DEBUG = true;
+    public static final Deque<Character> stack = new LinkedList<Character>();
+
+    public static void printRight(char c) {
+        if ('(' == c) System.out.print(')');
+        else if ('[' == c) System.out.print(']');
+    }
+
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        String line = scan.nextLine().trim();
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (')' != c && ']' != c) {
+                System.out.print(c);
+                stack.push(c);
+            } else if (')' == c) {
+                Character top = stack.peek();
+                while (top != null && '(' != top) {
+                    System.out.print(']');
+                    stack.pop();
+                    top = stack.peek();
+                }
+                if (top == null) {
+                    System.out.print('(');
+                } else {
+                    stack.pop();
+                }
+                System.out.print(')');
+            } else if (']' == c) {
+                Character top = stack.peek();
+                while (top != null && '[' != top) {
+                    System.out.print(')');
+                    stack.pop();
+                    top = stack.peek();
+                }
+                if (top == null) {
+                    System.out.print('[');
+                } else {
+                    stack.pop();
+                }
+                System.out.print(']');
+            }
+        }
+        while (!stack.isEmpty()) {
+            printRight(stack.pop());
+        }
+        System.out.println();
+    }
+}

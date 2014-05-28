@@ -1,0 +1,61 @@
+import java.util.Scanner;
+import java.util.Arrays;
+
+public class Main {
+    private static int[] times = new int[60];
+    private static int[] uses = new int[60];
+    private static int min = Integer.MAX_VALUE;
+    private static int route = 0;
+
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        int n = scan.nextInt();
+        for (int i = 0; i < n; i++) times[scan.nextInt()]++;
+
+        int first = 0;
+        for (int i = 0; i < n; i++)
+            if (times[i] > 0) {
+                first = i;
+                break;
+            }
+        dfs(first, n, 0);
+        System.out.println(min);
+    }
+
+    private static void dfs(int node, int left, int routeNum) {
+        System.out.println(node+", "+left+", "+routeNum);
+        //System.out.println("times: " + Arrays.toString(times));
+        //System.out.println("uses: " + Arrays.toString(uses));
+        if (routeNum >= min) return;
+        for (int i = node + 1; i < 60; i++) {
+            if (check(node, i-node)) {
+                int use = use(node, i-node, 1);
+                if (left - use == 0) {
+                    min = Math.min(min, routeNum+1);
+                } else {
+                    for (int j = node; j < 30; j++) {
+                        if (times[j]-uses[j] > 0) {
+                            dfs(j, left-use, routeNum+1);
+                        }
+                    }
+                }
+                use(node, i-node, -1);
+            }
+        }
+    }
+
+    private static int use(int start, int interval, int diff) {
+        int ret = 0;
+        for (int i = start; i < 60; i += interval) {
+            uses[i] += diff;
+            ret += diff;
+        }
+        return ret;
+    }
+
+    private static boolean check(int start, int interval) {
+        for (int i = start; i < 60; i += interval)
+            if (uses[i] >= times[i]) return false;
+        return true;
+    }
+}

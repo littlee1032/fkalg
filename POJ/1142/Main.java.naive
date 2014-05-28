@@ -1,0 +1,71 @@
+import java.util.Scanner;
+
+public class Main {
+    public static final boolean DEBUG = true;
+    public static final int[] primes = new int[1000];
+    public static final int[] pValues = new int[1000];
+
+    public static int nextPrime(int i) {
+        if (primes[i + 1] == 0) {
+            primes[i + 1] = genPrime(primes[i]);
+            pValues[i + 1] = calValue(primes[i + 1]);
+            //if (DEBUG) System.out.println("Next " + (i + 1) + "th prime is " + primes[i + 1]);
+        }
+        return primes[i + 1];
+    }
+
+    public static int calValue(int i) {
+        int ret = 0;
+        while (i > 0) {
+            ret += i % 10;
+            i /= 10;
+        }
+        return ret;
+    }
+
+    public static boolean isPrime(int num) {
+        for (int i = 2; i <= Math.round(Math.sqrt(num)) + 0.5; i++) {
+            if (num % i == 0) return false;
+        }
+        return true;
+    }
+
+    private static int genPrime(int i) {
+        for (int num = i + 1;;num++) {
+            if (isPrime(num)) return num;
+        }
+     }
+
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        primes[0] = 2;
+        pValues[0] = 2;
+        int n = scan.nextInt();
+        while (n > 0) {
+            for (int num = n + 1;; num++) {
+                if (isPrime(num)) continue;
+                int target = calValue(num);
+                int nn = num;
+                int pIdx = -1;
+                int mValue = 0;
+                while (nn != 1) {
+                    int p = nextPrime(pIdx);
+                    if (nn % p != 0) pIdx++;
+                    else {
+                        mValue += pValues[pIdx + 1];
+                        nn /= p;
+                        if (isPrime(nn)) {
+                            mValue += calValue(nn);
+                            nn = 1;
+                        }
+                    }
+                }
+                if (mValue == target) {
+                    System.out.println(num);
+                    break;
+                }
+            }
+            n = scan.nextInt();
+        }
+    }
+}

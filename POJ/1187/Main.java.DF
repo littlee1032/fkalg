@@ -1,0 +1,71 @@
+import java.util.Scanner;
+import java.util.Arrays;
+
+public class Main {
+    private static long mod = 11380L;
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        int l1 = scan.nextInt();
+        int l2 = scan.nextInt();
+        int l3 = scan.nextInt();
+        int d = scan.nextInt();
+
+        if (l1+l2+l3 < d) {
+            System.out.println(0);
+            return;
+        }
+
+        if (l1+l2+l3 == d) {
+            System.out.println(1);
+            return;
+        }
+
+        long[][][][] dp = new long[l1+1][l2+1][l3+1][d+1];
+        for (int dd = 0; dd <= d; dd++) dp[0][0][0][dd] = 1L;
+
+        for (int dd = 1; dd <= d; dd++) {
+            for (int dl1 = 0; dl1 <= l1; dl1++) {
+                for (int dl2 = 0; dl2 <= l2; dl2++) {
+                    for (int dl3 = 0; dl3 <= l3; dl3++) {
+                        long res = 0L;
+                        for (int k = 0; k <= dl3 - 1; k++) {
+                            res += dp[0][0][k][dd-1] * dp[0][0][dl3-k-1][dd];
+                        }
+
+                        for (int j = 0; j <= dl2 - 1; j++) {
+                            for (int k = 0; k <= dl3; k++) {
+                                res += dp[0][j][k][dd-1] * dp[0][dl2-j-1][dl3-k][dd];
+                            }
+                        }
+
+                        for (int i = 0; i <= dl1-1; i++) {
+                            for (int j = 0; j <= dl2 - 1; j++) {
+                                for (int k = 0; k <= dl3; k++) {
+                                    res += dp[i][j][k][dd-1] * dp[dl1-i-1][dl2-j][dl3-k][dd];
+                                }
+                            }
+                        }
+
+                        dp[dl1][dl2][dl3][dd] = res;
+                        System.out.println(dl1+", "+dl2+", "+dl3+", "+dd + " : " + res);
+                    }
+                }
+                //System.out.println(Arrays.toString(dp[dl1][l2][l3]));
+
+            }
+        }
+        /*
+        for (int dd = 0; dd <= d; dd++) {
+            System.out.println("D: " + dd);
+            for (int k = 0; k <= l3; k++) {
+                System.out.println("K: " + k);
+                for (int j = 0; j <= l2; j++) {
+                    System.out.print(dp[
+                }
+            }
+        }
+        */
+
+        System.out.println((dp[l1][l2][l3][d] - dp[l1][l2][l3][d-1]) % 11380);
+    }
+}
