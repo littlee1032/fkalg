@@ -1,0 +1,131 @@
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Scanner;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.HashSet;
+
+public class Main {
+    private static class Coord {
+        public final int x;
+        public final int y;
+
+        public Coord(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        @Override public boolean equals(Object oo) {
+            Coord o = (Coord)oo;
+            return this.x == o.x && this.y == o.y;
+        }
+
+        @Override public int hashCode() {
+            return x * 100 + y;
+        }
+
+        public int squreDist(Coord o) {
+            return (x - o.x) * (x - o.x) + (y - o.y) * (y - o.y);
+        }
+    }
+
+    public static final Coord ORG = new Coord(1, 1);
+
+    private static class AStar implements Comparator<HoleDox> {
+        @Override public int compare(HoleDox dox1, HoleDox dox2) {
+            return dox1.body.get(0).squreDist(ORG) - dox2.body.get(0).squreDist(ORG);
+        }
+    }
+
+    private static class HoleDox {
+        public final List<Coord> body;
+        public final int step;
+
+        public HoleDox(List<Coord> body, int step) {
+            this.body = body;
+            this.step = step;
+        }
+
+        @Override public boolean equals(Object oo) {
+            HoleDox o = (HoleDox)oo;
+            return body.equals(o.body);
+        }
+
+        @Override public int hashCode() {
+            return body.hashCode();
+        }
+    }
+
+    private static final boolean[][] board = new boolean[21][21];
+
+    private static int n;
+    private static int m;
+    private static int l;
+
+    private static final int[] dx = new int[]{-1, 0, 1, 0};
+    private static final int[] dy = new int[]{0, -1, 0, 1};
+
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        n = scan.nextInt();
+        m = scan.nextInt();
+        l = scan.nextInt();
+        int testIdx = 0;
+        while (n + m + l > 0) {
+            for (int i = 1; i <= n; i++) Arrays.fill(board[i], false);
+            List<Coord> body = new LinkedList<Coord>();
+            for (int i = 1; i <= l; i++) {
+                int r = scan.nextInt();
+                int c = scan.nextInt();
+                body.add(new Coord(r, c));
+            }
+            HoleDox dox = new HoleDox(body, 0);
+            int stoneNum = scan.nextInt();
+            for (int i = 1; i <= stoneNum; i++) {
+                int r = scan.nextInt();
+                int c = scan.nextInt();
+                board[r][c] = true;
+            }
+
+            int ret = solve(dox);
+            System.out.println(String.format("Case %d: %d", ++testIdx, ret));
+
+            n = scan.nextInt();
+            m = scan.nextInt();
+            l = scan.nextInt();
+        }
+    }
+
+    private static int solve(HoleDox dox) {
+        PriorityQueue<HoleDox> pq = new PriorityQueue<HoleDox>(10, new AStar());
+        pq.offer(dox);
+        Set<HoleDox> vis = new HashSet<HoleDox>();
+        while (!pq.isEmpty()) {
+            HoleDox hd = pq.poll();
+            Coord head = hd.body.get(0);
+            if (ORG.equals(head)) {
+                return hd.step;
+            } else {
+                vis.add(hd);
+                int nStep = hd.step + 1;
+                for (int i = 0; i < 4; i++) {
+                    int nx = head.x + dx[i];
+                    int ny = head.y + dy[i];
+                    if (nx >= 1 && nx <= n && ny >= 1 && ny <= m
+                        && !board[nx][ny]) {
+                        Coord nHead = new Coord(nx, ny);
+                        if (hd.body.contains(nHead)) continue;
+                        LinkedList<Coord> nBody = new LinkedList<Coord>(hd.body);
+                        nBody.addFirst(nHead);
+                        nBody.removeLast();
+                        HoleDox nDox = new HoleDox(nBody, nStep);
+                        if (!vis.contains(nDox)) pq.offer(nDox);
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+}
